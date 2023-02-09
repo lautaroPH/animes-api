@@ -6,4 +6,7 @@ const env = await load();
 const supabaseUrl = env['SUPABASE_URL'];
 const supabaseAnonKey = env['SUPABASE_ANON_KEY'];
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(
+  'https://mocvdkjomupgrvizemzh.supabase.co',
+  supabaseAnonKey,
+);
