@@ -3,8 +3,8 @@ import { load } from 'https://deno.land/std@0.177.0/dotenv/mod.ts';
 
 const env = await load();
 
-const supabaseUrl = env['SUPABASE_URL'];
-const supabaseAnonKey = env['SUPABASE_ANON_KEY'];
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
 console.log(supabaseAnonKey, supabaseUrl);
 
