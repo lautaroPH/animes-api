@@ -28,19 +28,13 @@ app.get('/', async (c) => {
 
 app.get('/anime/:id', async (c) => {
   const id = c.req.param('id');
-  const params = c.req.query();
   const rapidapiSecret = c.req.headers.get('X-RapidAPI-Proxy-Secret');
 
   if (rapidapiSecret !== Deno.env.get('RAPIDAPI_SECRET')) {
     return c.json({ message: 'Forbidden' });
   }
 
-  const fields = params.fields || 'id,title,mal_id,main_picture';
-
-  const { data } = await supabase
-    .from('animes')
-    .select(fields)
-    .eq('mal_id', id);
+  const { data } = await supabase.from('animes').select('*').eq('mal_id', id);
 
   if (!data || data.length === 0) {
     return c.json({ message: 'Anime not found' });
