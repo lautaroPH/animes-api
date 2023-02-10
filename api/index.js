@@ -43,32 +43,4 @@ app.get('/anime/:id', async (c) => {
   return c.json(data);
 });
 
-app.put('/anime/:id', async (c) => {
-  const id = c.req.param('id');
-  const rapidapiSecret = c.req.headers.get('X-RapidAPI-Proxy-Secret');
-
-  if (rapidapiSecret !== Deno.env.get('RAPIDAPI_SECRET')) {
-    return c.json({ message: 'Forbidden' });
-  }
-
-  try {
-    const dataToUpdate = await c.req.json();
-
-    const { data, error } = await supabase
-      .from('animes')
-      .update(dataToUpdate)
-      .eq('mal_id', id)
-      .select('*');
-
-    if (error) {
-      return c.json({ message: 'Anime not found' });
-    }
-
-    return c.json(data[0]);
-  } catch (error) {
-    console.log(error);
-    return c.json({ message: 'Invalid JSON' });
-  }
-});
-
 serve(app.fetch);
