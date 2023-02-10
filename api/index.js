@@ -7,14 +7,17 @@ const app = new Hono();
 
 app.get('/', async (c) => {
   const params = c.req.query();
+  const limit = Number(params.limit) || 10;
+
   const { data, nextPage } = await getAnimeFilters(params, c);
 
   if (!data || data.length === 0) {
     return c.json({ message: '404 not found' });
   }
+
   return c.json({
     animes: data,
-    nextPage: data && data.length === params.limit ? nextPage : null,
+    nextPage: data && data.length === limit ? nextPage : null,
   });
 });
 
