@@ -17,6 +17,7 @@ export const getAnimeFilters = async (params) => {
   const yearLess = params.year_less || '';
   const yearGreater = params.year_greater || '';
   const language = params.language || 'ja';
+  const nsfw = params.nsfw || 'false';
 
   let query = supabase
     .from('animes')
@@ -43,6 +44,7 @@ export const getAnimeFilters = async (params) => {
         type: 'websearch',
       });
     }
+  if (nsfw === 'false') query = query.not('genres', 'cs', '{"Hentai"}');
 
   const { data, error } = await query;
 
