@@ -65,7 +65,7 @@ export const getAnimeFilters = async (params, access_token) => {
   const yearLessUrl = yearLess ? `&year_less=${yearLess}` : '';
   const yearGreaterUrl = yearGreater ? `&year_greater=${yearGreater}` : '';
 
-  const nextPage = `https://animes-api.deno.dev/?${searchUrl}${fieldsUrl}${limitUrl}${offsetUrl}${orderUrl}${ascendingUrl}${mediaTypeUrl}${studioUrl}${sourceUrl}${genreUrl}${statusUrl}${seasonUrl}${yearEqualUrl}${yearLessUrl}${yearGreaterUrl}`;
+  const nextPage = `https://animes5.p.rapidapi.com/?${searchUrl}${fieldsUrl}${limitUrl}${offsetUrl}${orderUrl}${ascendingUrl}${mediaTypeUrl}${studioUrl}${sourceUrl}${genreUrl}${statusUrl}${seasonUrl}${yearEqualUrl}${yearLessUrl}${yearGreaterUrl}`;
 
   return { data, nextPage };
 };
