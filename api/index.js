@@ -6,15 +6,15 @@ import { animeHeaders } from '../utils/anime-headers.js';
 
 const app = new Hono();
 
-// app.use('*', async (c, next) => {
-//   const rapidapiSecret = c.req.headers.get('X-RapidAPI-Proxy-Secret');
+app.use('*', async (c, next) => {
+  const rapidapiSecret = c.req.headers.get('X-RapidAPI-Proxy-Secret');
 
-//   if (rapidapiSecret !== Deno.env.get('RAPIDAPI_SECRET')) {
-//     return c.json({ message: 'Forbidden' });
-//   }
+  if (rapidapiSecret !== Deno.env.get('RAPIDAPI_SECRET')) {
+    return c.json({ message: 'Forbidden' });
+  }
 
-//   await next();
-// });
+  await next();
+});
 
 app.get('/', async (c) => {
   const params = c.req.query();
