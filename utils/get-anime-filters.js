@@ -1,6 +1,6 @@
-import { supabase } from './supabase-client.js';
+import { animesHeaders } from './animes-headers.js';
 
-export const getAnimeFilters = async (params) => {
+export const getAnimeFilters = async (params, access_token) => {
   const fields = params.fields || 'id,title,title_english,mal_id,main_picture';
   const search = params.q || '';
   const limit = Number(params.limit) || 10;
@@ -19,43 +19,40 @@ export const getAnimeFilters = async (params) => {
   const language = params.language || 'ja';
   const nsfw = params.nsfw || 'false';
 
-  let query = supabase
-    .from('animes')
-    .select(fields)
-    .range(offset, limit + offset - 1)
-    .order(order, { ascending });
+  const maxLimit = limit > 100 ? 100 : limit;
 
-  if (mediaType) query = query.eq('media_type', mediaType);
-  if (studio) query = query.contains('studios', [studio]);
-  if (source) query = query.eq('source', source);
-  if (genre) query = query.contains('genres', [genre]);
-  if (status) query = query.eq('status', status);
-  if (season) query = query.eq('season', season);
-  if (yearEqual) query = query.eq('year', yearEqual);
-  if (yearLess) query = query.lt('year', yearLess);
-  if (yearGreater) query = query.gt('year', yearGreater);
+  let url = `https://mocvdkjomupgrvizemzh.supabase.co/rest/v1/animes?select=${fields}&order=${order}.${
+    ascending ? 'asc' : 'desc'
+  }`;
+
+  if (mediaType) url += `&media_type=ilike.${mediaType}`;
+  if (studio) url += `&studios=cs.{${studio}}`;
+  if (source) url += `&source=ilike.source`;
+  if (genre) url += `&genres=cs.{${genre}}`;
+  if (status) url += `&status=ilike.${status}`;
+  if (season) url += `&season=ilike.${season}`;
+  if (yearEqual) url += `&year=eq.${yearEqual}`;
+  if (yearLess) url += `&year=lt.${yearLess}`;
+  if (yearGreater) url += `&year=gt.${yearGreater}`;
   if (search)
     if (language === 'ja') {
-      query = query.textSearch('title', search, {
-        type: 'websearch',
-      });
+      url += `&title=ilike.${search}`;
     } else if (language === 'en') {
-      query = query.textSearch('title_english', search, {
-        type: 'websearch',
-      });
+      url += `&title_english=ilike.${search}`;
     }
-  if (nsfw === 'false') query = query.not('genres', 'cs', '{"Hentai"}');
 
-  const { data, error } = await query;
+  if (nsfw === 'false') url += `&genres=not.cs.{Hentai}`;
 
-  if (error) {
-    console.log(error);
-  }
+  const range = `${offset}-${maxLimit + offset - 1}`;
+
+  const res = await fetch(url, animesHeaders(access_token, range));
+
+  const data = await res.json();
 
   const searchUrl = search ? `q=${search}` : '';
   const fieldsUrl = fields ? `fields=${fields}` : '';
-  const limitUrl = limit ? `&limit=${limit}` : '';
-  const offsetUrl = offset ? `&offset=${limit + offset}` : '';
+  const limitUrl = maxLimit ? `&limit=${maxLimit}` : '';
+  const offsetUrl = `&offset=${maxLimit + offset}`;
   const orderUrl = order ? `&order=${order}` : '';
   const ascendingUrl = ascending ? `&ascending=${ascending}` : '';
   const mediaTypeUrl = mediaType ? `&media_type=${mediaType}` : '';
@@ -68,7 +65,7 @@ export const getAnimeFilters = async (params) => {
   const yearLessUrl = yearLess ? `&year_less=${yearLess}` : '';
   const yearGreaterUrl = yearGreater ? `&year_greater=${yearGreater}` : '';
 
-  const nextPage = `http://localhost:8000/?${searchUrl}${fieldsUrl}${limitUrl}${offsetUrl}${orderUrl}${ascendingUrl}${mediaTypeUrl}${studioUrl}${sourceUrl}${genreUrl}${statusUrl}${seasonUrl}${yearEqualUrl}${yearLessUrl}${yearGreaterUrl}`;
+  const nextPage = `https://animes-api.deno.dev/?${searchUrl}${fieldsUrl}${limitUrl}${offsetUrl}${orderUrl}${ascendingUrl}${mediaTypeUrl}${studioUrl}${sourceUrl}${genreUrl}${statusUrl}${seasonUrl}${yearEqualUrl}${yearLessUrl}${yearGreaterUrl}`;
 
   return { data, nextPage };
 };
