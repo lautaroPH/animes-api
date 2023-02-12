@@ -1,29 +1,25 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { Hono } from 'https://deno.land/x/hono@v2.7.7/mod.ts';
 import { getAnimeFilters } from '../utils/get-anime-filters.js';
-import { loginHeaders } from '../utils/login-headers.js';
 import { animeHeaders } from '../utils/anime-headers.js';
+import { getAccessToken } from '../utils/get-access-token.js';
 
 const app = new Hono();
 
-app.use('*', async (c, next) => {
-  const rapidapiSecret = c.req.headers.get('X-RapidAPI-Proxy-Secret');
+// app.use('*', async (c, next) => {
+//   const rapidapiSecret = c.req.headers.get('X-RapidAPI-Proxy-Secret');
 
-  if (rapidapiSecret !== Deno.env.get('RAPIDAPI_SECRET')) {
-    return c.json({ message: 'Forbidden' });
-  }
+//   if (rapidapiSecret !== Deno.env.get('RAPIDAPI_SECRET')) {
+//     return c.json({ message: 'Forbidden' });
+//   }
 
-  await next();
-});
+//   await next();
+// });
 
 app.get('/', async (c) => {
   const params = c.req.query();
 
-  const res = await fetch(
-    'https://mocvdkjomupgrvizemzh.supabase.co/auth/v1/token?grant_type=password',
-    loginHeaders,
-  );
-  const { access_token } = await res.json();
+  const access_token = await getAccessToken();
 
   const limit = Number(params.limit) || 10;
   const maxLimit = limit > 100 ? 100 : limit;
@@ -43,11 +39,7 @@ app.get('/', async (c) => {
 app.get('/anime/:id', async (c) => {
   const id = c.req.param('id');
 
-  const resLogin = await fetch(
-    'https://mocvdkjomupgrvizemzh.supabase.co/auth/v1/token?grant_type=password',
-    loginHeaders,
-  );
-  const { access_token } = await resLogin.json();
+  const access_token = await getAccessToken();
 
   const res = await fetch(
     `https://mocvdkjomupgrvizemzh.supabase.co/rest/v1/animes?mal_id=eq.${id}&select=*`,
@@ -66,11 +58,7 @@ app.get('/:search', async (c) => {
   const language = c.req.query('language');
   const search = c.req.param('search');
 
-  const resLogin = await fetch(
-    'https://mocvdkjomupgrvizemzh.supabase.co/auth/v1/token?grant_type=password',
-    loginHeaders,
-  );
-  const { access_token } = await resLogin.json();
+  const access_token = await getAccessToken();
 
   const searchUrl = language === 'en' ? 'title_english' : 'title';
 
