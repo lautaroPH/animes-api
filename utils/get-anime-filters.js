@@ -36,9 +36,9 @@ export const getAnimeFilters = async (params, access_token) => {
   if (yearGreater) url += `&year=gt.${yearGreater}`;
   if (search)
     if (language === 'ja') {
-      url += `&title=ilike.${search}`;
+      url += `&title=ilike.${search}%`;
     } else if (language === 'en') {
-      url += `&title_english=ilike.${search}`;
+      url += `&title_english=ilike.${search}%`;
     }
 
   if (nsfw === 'false') url += `&genres=not.cs.{Hentai}`;

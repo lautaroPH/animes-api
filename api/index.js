@@ -62,4 +62,32 @@ app.get('/anime/:id', async (c) => {
   return c.json(data);
 });
 
+app.get('/:search', async (c) => {
+  const language = c.req.query('language');
+  const search = c.req.param('search');
+
+  const resLogin = await fetch(
+    'https://mocvdkjomupgrvizemzh.supabase.co/auth/v1/token?grant_type=password',
+    loginHeaders,
+  );
+  const { access_token } = await resLogin.json();
+
+  const searchUrl = language === 'en' ? 'title_english' : 'title';
+
+  const res = await fetch(
+    `https://mocvdkjomupgrvizemzh.supabase.co/rest/v1/animes?${searchUrl}=ilike.${search}&select=*`,
+    animeHeaders(access_token),
+  );
+
+  const data = await res.json();
+
+  if (!data || data.length === 0) {
+    return c.json({ message: '404 not found' });
+  }
+
+  return c.json({
+    animes: data,
+  });
+});
+
 serve(app.fetch);
