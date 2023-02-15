@@ -61,7 +61,9 @@ app.get('/search/:search', async (c) => {
   const { data, error } = await supabase
     .from('animes')
     .select(fields)
-    .or(`title.ilike.${search},title_english.ilike.${search}`);
+    .or(
+      `title.ilike.${search},title_english.ilike.${search},title_japanese.ilike.${search}%`,
+    );
 
   if (!data || data.length === 0 || error) {
     return c.json({ message: '404 not found' });
