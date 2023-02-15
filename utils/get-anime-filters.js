@@ -1,8 +1,7 @@
 import { supabase } from './supabase-client.js';
 
 export const getAnimeFilters = async (params) => {
-  const fields =
-    params.fields || 'id,title,title_english,mal_id,main_picture,titles_search';
+  const fields = params.fields || 'id,title,title_english,mal_id,main_picture';
   const search = params.q || '';
   const limit = Number(params.limit) || 10;
   const offset = Number(params.offset) || 0;
