@@ -1,11 +1,12 @@
-import { animesHeaders } from './animes-headers.js';
+import { supabase } from './supabase-client.js';
 
-export const getAnimeFilters = async (params, access_token) => {
-  const fields = params.fields || 'id,title,title_english,mal_id,main_picture';
+export const getAnimeFilters = async (params) => {
+  const fields =
+    params.fields || 'id,title,title_english,mal_id,main_picture,titles_search';
   const search = params.q || '';
   const limit = Number(params.limit) || 10;
   const offset = Number(params.offset) || 0;
-  const ascending = params.ascending === 'false' ? false : true;
+  const ascending = params.sort === 'false' ? false : true;
   const order = params.order || 'rank';
   const mediaType = params.media_type || '';
   const studio = params.studio || '';
@@ -16,38 +17,34 @@ export const getAnimeFilters = async (params, access_token) => {
   const yearEqual = params.year_equal || '';
   const yearLess = params.year_less || '';
   const yearGreater = params.year_greater || '';
-  const language = params.language || 'ja';
   const nsfw = params.nsfw || 'false';
 
   const maxLimit = limit > 100 ? 100 : limit;
 
-  let url = `https://mocvdkjomupgrvizemzh.supabase.co/rest/v1/animes?select=${fields}&order=${order}.${
-    ascending ? 'asc' : 'desc'
-  }`;
+  let query = supabase
+    .from('animes')
+    .select(fields)
+    .range(offset, maxLimit + offset - 1)
+    .order(order, { ascending });
 
-  if (mediaType) url += `&media_type=ilike.${mediaType}`;
-  if (studio) url += `&studios=cs.{${studio}}`;
-  if (source) url += `&source=ilike.source`;
-  if (genre) url += `&genres=cs.{${genre}}`;
-  if (status) url += `&status=ilike.${status}`;
-  if (season) url += `&season=ilike.${season}`;
-  if (yearEqual) url += `&year=eq.${yearEqual}`;
-  if (yearLess) url += `&year=lt.${yearLess}`;
-  if (yearGreater) url += `&year=gt.${yearGreater}`;
+  if (mediaType) query = query.eq('media_type', mediaType);
+  if (studio) query = query.contains('studios', [studio]);
+  if (source) query = query.eq('source', source);
+  if (genre) query = query.contains('genres', [genre]);
+  if (status) query = query.eq('status', status);
+  if (season) query = query.eq('season', season);
+  if (yearEqual) query = query.eq('year', yearEqual);
+  if (yearLess) query = query.lt('year', yearLess);
+  if (yearGreater) query = query.gt('year', yearGreater);
   if (search)
-    if (language === 'ja') {
-      url += `&title=ilike.${search}%25`;
-    } else if (language === 'en') {
-      url += `&title_english=ilike.${search}%25`;
-    }
+    query = query.or(`title.ilike.${search}%,title_english.ilike.${search}%`);
+  if (nsfw === 'false') query = query.not('genres', 'cs', '{[Hentai]}');
 
-  if (nsfw === 'false') url += `&genres=not.cs.{Hentai}`;
+  const { data, error } = await query;
 
-  const range = `${offset}-${maxLimit + offset - 1}`;
-
-  const res = await fetch(url, animesHeaders(access_token, range));
-
-  const data = await res.json();
+  if (error) {
+    console.log(error);
+  }
 
   const searchUrl = search ? `q=${search}` : '';
   const fieldsUrl = fields ? `fields=${fields}` : '';
