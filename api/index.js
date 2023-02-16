@@ -62,7 +62,7 @@ app.get('/search/:search', async (c) => {
     .from('animes')
     .select(fields)
     .or(
-      `title.ilike.${search},title_english.ilike.${search},title_japanese.ilike.${search}%`,
+      `title.eq.${search},title_english.eq.${search},title_japanese.eq.${search}`,
     );
 
   if (!data || data.length === 0 || error) {

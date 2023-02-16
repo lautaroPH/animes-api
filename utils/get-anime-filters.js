@@ -37,7 +37,7 @@ export const getAnimeFilters = async (params) => {
   if (yearGreater) query = query.gt('year', yearGreater);
   if (search)
     query = query.or(
-      `title.ilike.${search}%,title_english.ilike.${search}%,title_japanese.ilike.${search}%`,
+      `title.ilike.${search}%,title_english.ilike.${search}%,title_japanese.ilike.${search}%,synonyms.cs.{${search}}`,
     );
   if (nsfw === 'false') query = query.not('genres', 'cs', '{[Hentai]}');
 
