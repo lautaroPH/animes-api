@@ -53,25 +53,4 @@ app.get('/anime/:id', async (c) => {
   });
 });
 
-app.get('/search/:search', async (c) => {
-  const params = c.req.query();
-  const search = c.req.param('search');
-  const fields = params.fields || 'id,title,title_english,mal_id,main_picture';
-
-  const { data, error } = await supabase
-    .from('animes')
-    .select(fields)
-    .or(
-      `title.eq.${search},title_english.eq.${search},title_japanese.eq.${search}`,
-    );
-
-  if (!data || data.length === 0 || error) {
-    return c.json({ message: '404 not found' });
-  }
-
-  return c.json({
-    anime: data[0],
-  });
-});
-
 serve(app.fetch);
